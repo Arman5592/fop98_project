@@ -482,6 +482,34 @@ void send_msg(char buffer[]){
     for(int i=n;i<n+32;i++){
         auth_token[i-n] = buffer[i];
     }
+    auth_token[32]=0;
+
+    //printf("%s|\n",auth_token);
+
+    char *tmp_au;
+    char tmp_au_2[36]="\"";
+
+    strcat(tmp_au_2,auth_token);
+    strcat(tmp_au_2,"\"");
+    cJSON *tmp_au_j = cJSON_CreateObject();
+    int tmp_flag=0;
+    for(int i=0;i<online_user_cnt;i++){
+        tmp_au_j = cJSON_GetArrayItem(current_tokens,i);
+        tmp_au = cJSON_PrintUnformatted(tmp_au_j);
+        if(strcmp(tmp_au_2,tmp_au)==0){
+            //yani hast
+            tmp_flag=1;
+            break;
+        }
+
+    }
+    if(tmp_flag == 0){
+
+        char *output_str = qTjson_twinMessage("type","Error","content","Wrong Auth Token");
+
+        response(output_str);//ino bayad  bedim be client
+        return;
+    }
     //msg ro darim, tokene yaro ro darim, miaim channelesh ro dar miarim
 
     cJSON *un;
@@ -497,6 +525,12 @@ void send_msg(char buffer[]){
     cJSON *ch;
 
     ch = cJSON_GetObjectItemCaseSensitive(tokens_channel,auth_token);
+    if(ch == NULL){
+        char *output_str = qTjson_twinMessage("type","Error","content","User Isnt In a Channel");
+
+        response(output_str);//ino bayad  bedim be client
+        return;
+    }
     char *ch_str_tmp = cJSON_Print(ch);
     char ch_str[31];
     for(int i=1; i<strlen(ch_str_tmp)-1;i++){
@@ -514,7 +548,7 @@ void send_msg(char buffer[]){
 
     if((registry = fopen(address,"a")) == NULL){
 
-        output_str = qTjson_twinMessage("type","Error","content","Internal Error");
+        output_str = qTjson_twinMessage("type","Error","content","No Such Channel");
         response(output_str);//ino bayad  bedim be client
         fclose(registry);
         return;
@@ -534,6 +568,30 @@ void refresh(char buffer[]){
     char auth_token[33];
     sscanf(buffer,"%*s %s",auth_token);
 
+    char *tmp_au;
+    char tmp_au_2[36]="\"";
+
+    strcat(tmp_au_2,auth_token);
+    strcat(tmp_au_2,"\"");
+    cJSON *tmp_au_j = cJSON_CreateObject();
+    int tmp_flag=0;
+    for(int i=0;i<online_user_cnt;i++){
+        tmp_au_j = cJSON_GetArrayItem(current_tokens,i);
+        tmp_au = cJSON_PrintUnformatted(tmp_au_j);
+        if(strcmp(tmp_au_2,tmp_au)==0){
+            //yani hast
+            tmp_flag=1;
+            break;
+        }
+
+    }
+    if(tmp_flag == 0){
+
+        char *output_str = qTjson_twinMessage("type","Error","content","Wrong Auth Token");
+
+        response(output_str);//ino bayad  bedim be client
+        return;
+    }
 
     char * msg_array = qTjson_createArray();
     int n;//tedad payami ke dide
@@ -542,6 +600,12 @@ void refresh(char buffer[]){
 
     cJSON *channel_j;
     channel_j = cJSON_GetObjectItem(tokens_channel,auth_token);
+    if(channel_j == NULL){
+        char *output_str = qTjson_twinMessage("type","Error","content","User Isnt In a Channel");
+
+        response(output_str);//ino bayad  bedim be client
+        return;
+    }
 
     char address[56];
     sprintf(address,"channels/%s.json",channel_j -> valuestring);
@@ -585,6 +649,31 @@ void members_list(char buffer[]){
     char auth_token[33];
     sscanf(buffer,"%*s %*s %s",auth_token);
 
+    char *tmp_au;
+    char tmp_au_2[36]="\"";
+
+    strcat(tmp_au_2,auth_token);
+    strcat(tmp_au_2,"\"");
+    cJSON *tmp_au_j = cJSON_CreateObject();
+    int tmp_flag=0;
+    for(int i=0;i<online_user_cnt;i++){
+        tmp_au_j = cJSON_GetArrayItem(current_tokens,i);
+        tmp_au = cJSON_PrintUnformatted(tmp_au_j);
+        if(strcmp(tmp_au_2,tmp_au)==0){
+            //yani hast
+            tmp_flag=1;
+            break;
+        }
+
+    }
+    if(tmp_flag == 0){
+
+        char *output_str = qTjson_twinMessage("type","Error","content","Wrong Auth Token");
+
+        response(output_str);//ino bayad  bedim be client
+        return;
+    }
+
     //bayad bebinim yaroo tu kodom kanale!
     char * mem_array = qTjson_createArray();
 
@@ -592,6 +681,12 @@ void members_list(char buffer[]){
     cJSON *channel_name_json;
 
     channel_name_json = cJSON_GetObjectItemCaseSensitive(tokens_channel,auth_token);
+    if(channel_name_json == NULL){
+        char *output_str = qTjson_twinMessage("type","Error","content","User Isnt In a Channel");
+
+        response(output_str);//ino bayad  bedim be client
+        return;
+    }
     channel_name = cJSON_PrintUnformatted(channel_name_json);
 
     char *tmp_ch;
@@ -644,6 +739,8 @@ void leave(char buffer[]){
     char auth_token[33];
     sscanf(buffer,"%*s %s",auth_token);
 
+    
+
     char *tmp_au;
     char tmp_au_2[36]="\"";
 
@@ -684,6 +781,12 @@ void leave(char buffer[]){
     cJSON *ch;
 
     ch = cJSON_GetObjectItemCaseSensitive(tokens_channel,auth_token);
+    if(ch == NULL){
+        char *output_str = qTjson_twinMessage("type","Error","content","User Isnt In a Channel");
+
+        response(output_str);//ino bayad  bedim be client
+        return;
+    }
     char *ch_str_tmp = cJSON_Print(ch);
     char ch_str[31];
     for(int i=1; i<strlen(ch_str_tmp)-1;i++){
@@ -728,6 +831,32 @@ void logout(char buffer[]){
     //az arraye tokens channel , tokens username va online users
     char auth_token[33];
     sscanf(buffer,"%*s %s",auth_token);
+
+    char *tmp_au;
+    char tmp_au_2[36]="\"";
+
+    strcat(tmp_au_2,auth_token);
+    strcat(tmp_au_2,"\"");
+    cJSON *tmp_au_j = cJSON_CreateObject();
+
+    int tmp_flag=0;
+    for(int i=0;i<online_user_cnt;i++){
+        tmp_au_j = cJSON_GetArrayItem(current_tokens,i);
+        tmp_au = cJSON_PrintUnformatted(tmp_au_j);
+        if(strcmp(tmp_au_2,tmp_au)==0){
+            //yani hast
+            tmp_flag=1;
+            break;
+        }
+
+    }
+    if(tmp_flag == 0){
+
+        char *output_str = qTjson_twinMessage("type","Error","content","Wrong Auth Token");
+
+        response(output_str);//ino bayad  bedim be client
+        return;
+    }
 
     cJSON *un;
 
