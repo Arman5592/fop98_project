@@ -563,7 +563,7 @@ void refresh(char buffer[]){
             }
         }
         //inja msg ha amadean , bayad age i az n bozorgtar mosavi bod chap konim
-        if(i>n){
+        if(i>=n){
             printf("%s\n",msg);
 
             msg_array = qTjson_appendToArray(msg_array,msg);
