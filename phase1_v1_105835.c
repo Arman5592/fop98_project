@@ -61,10 +61,10 @@ void initialize(){
 }//void initialize
 
 void account_menu(){
-	system("cls");
 	system("color B0");
 	puts("Hi!");
 	puts("A:A: , L: , R: , ... specifies your current menu.");
+	puts("pressing F will clear your screen (in any menu)");
 
 	puts("A:type L to login , R to register .");
 	char entrance;
@@ -77,16 +77,16 @@ void account_menu(){
 	else if(entrance == 'R'){
 		register_user();
 	}
-	//else if(entrance == 'E'){
-	//	return ;
-	//}
+	else if(entrance == 'F'){
+		system("cls");
+		account_menu();
+	}
 	else{
 		account_menu();
 	}
 }//VOID ACCOUNT MENU
 
 void main_menu(){
-	system("cls");
 	system("color 30");
 	puts("L: you are now logged in.");
 	printf("L: for the record, your auth token is:%s .\n",auth_token);
@@ -133,6 +133,9 @@ void main_menu(){
 
 
 
+	}
+	else if(entrance == 'F'){
+		system("cls");
 	}
 
 	else if(entrance == 'J'){
@@ -262,7 +265,6 @@ void main_menu(){
 }//VOID MAIN MENU
 
 void chat_menu(){
-	system("cls");
 	system("color 90");
 	while(true){
 	printf("C: you are in %s.\n",current_channel_name);
@@ -308,6 +310,9 @@ void chat_menu(){
 	else if(entrance == 'C'){
 		//members list
 		members_list();
+	}
+	else if(entrance == 'F'){
+		system("cls");
 	}
 	else if(entrance == 'L'){
 		//leave
