@@ -63,6 +63,8 @@ void initialize(){
 void account_menu(){
 	system("cls");
 	system("color B0");
+	puts("Hi!");
+	puts("A:A: , L: , R: , ... specifies your current menu.");
 
 	puts("A:type L to login , R to register .");
 	char entrance;
@@ -86,6 +88,8 @@ void account_menu(){
 void main_menu(){
 	system("cls");
 	system("color 30");
+	puts("L: you are now logged in.");
+	printf("L: for the record, your auth token is:%s .\n",auth_token);
 
 	while(true){
 	puts("M: type C to create a channel , J to join one , X to search for a user , L to log out or Q for a quote.");
@@ -491,8 +495,7 @@ void login(){
 	}
 	auth_token[32]='\0';
 
-	puts("L: you are now logged in.");
-	printf("L: for the record, your auth token is:%s .\n",auth_token);
+	
 
 	main_menu();
 
@@ -501,7 +504,6 @@ void login(){
 int main()
 {
 	char language;
-	puts("Hi! Salam!");
 
 	/*while(true){
 		puts("baraye finglish F ra type konid ,");
@@ -522,7 +524,6 @@ int main()
 
 	//initialize();
 
-	puts("A:A: , L: , R: , ... specifies your current menu.");
 
 	account_menu();
 

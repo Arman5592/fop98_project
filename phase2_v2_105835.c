@@ -312,7 +312,6 @@ void search_users(char buffer[]){
         if(strstr(tmp_un,query)!=NULL){
             //yani hast
             mem_array = qTjson_appendToArray(mem_array,tmp_un);
-            break;
         }
     }
 
