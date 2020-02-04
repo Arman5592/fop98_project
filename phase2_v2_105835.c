@@ -136,18 +136,11 @@ void read_command(){
         if(strcmp(command,"logout")==0) {
             logout(buffer);
         }
-        if(strcmp(command,"show")==0) {
-            char *output_str = cJSON_PrintUnformatted(tokens_channel);
-            printf("%s\n",output_str);
-
-            output_str = cJSON_PrintUnformatted(tokens_username);
-            printf("%s\n",output_str);
-
-            output_str = cJSON_PrintUnformatted(current_tokens);
-            printf("%s\n",output_str);
-
-            output_str = cJSON_PrintUnformatted(current_users);
-            printf("%s\n",output_str);
+        if(strcmp(command,"searchmsg")==0) {
+            search_messages(buffer);
+        }
+        if(strcmp(command,"searchusr")==0) {
+            search_users(buffer);
         }
 
     }
@@ -278,6 +271,54 @@ void login_user(char buffer[]){
     output_str = cJSON_PrintUnformatted(tokens_username);
 
     online_user_cnt++;
+}
+void search_users(char buffer[]){
+    char query[40];
+    char auth_token[33];
+    sscanf(buffer,"%*s %s %s",query,auth_token);
+
+    char *tmp_au;
+    char tmp_au_2[36]="\"";
+
+    strcat(tmp_au_2,auth_token);
+    strcat(tmp_au_2,"\"");
+    cJSON *tmp_au_j = cJSON_CreateObject();
+
+    int tmp_flag=0;
+    for(int i=0;i<online_user_cnt;i++){
+        tmp_au_j = cJSON_GetArrayItem(current_tokens,i);
+        tmp_au = cJSON_PrintUnformatted(tmp_au_j);
+        if(strcmp(tmp_au_2,tmp_au)==0){
+            //yani hast
+            tmp_flag=1;
+            break;
+        }
+    }
+    if(tmp_flag == 0){
+        char * output_str = qTjson_twinMessage("type","Error","content","Wrong Auth Token");
+        response(output_str);//ino bayad  bedim be client
+        return;
+    }
+
+    char * mem_array = qTjson_createArray();
+
+    cJSON * tmp_un_j;
+    char * tmp_un;
+    //miaim array e user haye faal ro check mikonim onsor be onsor
+    //har onsori ke matloob bashe ezafe mikonim be mem array va midim onvar
+    for(int i=0;i<online_user_cnt;i++){
+        tmp_un_j = cJSON_GetArrayItem(current_users,i);
+        tmp_un = cJSON_PrintUnformatted(tmp_un_j);
+        if(strstr(tmp_un,query)!=NULL){
+            //yani hast
+            mem_array = qTjson_appendToArray(mem_array,tmp_un);
+            break;
+        }
+    }
+
+    char * output_str = qTjson_twinMessageWithArray("type","List","content",mem_array);
+    response(output_str);
+    
 }
 
 void create_channel(char buffer[]){
@@ -469,6 +510,81 @@ void join_channel(char buffer[]){
     cJSON_AddItemToObject(tokens_msg_cnt,auth_token,cJSON_CreateNumber(0));
 
 
+}
+
+void search_messages(char buffer[]){
+    //aval mibinim token hast ya na, tu kanal hast ya na , badesh miaim
+    //mibinim tu che kanalie , badesh miaim search mikonim harchi payam
+    //bod midim be client va tu client ba dastore refresh mikhonim
+    char auth_token[33];
+    char query[40];
+    sscanf(buffer,"%*s %s %s",query,auth_token);
+    printf("searchq:%s\n",query);
+    char *tmp_au;
+    char tmp_au_2[36]="\"";
+
+    strcat(tmp_au_2,auth_token);
+    strcat(tmp_au_2,"\"");
+    cJSON *tmp_au_j = cJSON_CreateObject();
+    int tmp_flag=0;
+    for(int i=0;i<online_user_cnt;i++){
+        tmp_au_j = cJSON_GetArrayItem(current_tokens,i);
+        tmp_au = cJSON_PrintUnformatted(tmp_au_j);
+        if(strcmp(tmp_au_2,tmp_au)==0){
+            //yani hast
+            tmp_flag=1;
+            break;
+        }
+
+    }
+    if(tmp_flag == 0){
+
+        char *output_str = qTjson_twinMessage("type","Error","content","Wrong Auth Token");
+
+        response(output_str);//ino bayad  bedim be client
+        return;
+    }
+    cJSON *ch;
+    puts("a");
+    ch = cJSON_GetObjectItemCaseSensitive(tokens_channel,auth_token);
+    if(ch == NULL){
+        char *output_str = qTjson_twinMessage("type","Error","content","User Isnt In a Channel");
+
+        response(output_str);//ino bayad  bedim be client
+        return;
+    }
+    char *ch_str_tmp = cJSON_Print(ch);
+    char ch_str[31];
+    for(int i=1; i<strlen(ch_str_tmp)-1;i++){
+        ch_str[i-1] = ch_str_tmp[i];
+    }
+    ch_str[strlen(ch_str_tmp)-2]=0;
+    puts("b");
+    //alan username va channelesh ro darim, miaim msg ro chap mikonim
+    char address[56];
+    sprintf(address,"channels/%s.json",ch_str);
+    char * msg_array = qTjson_createArray();
+
+    FILE *reader=fopen(address,"r");
+    char msg[80];
+    while(!feof(reader)){
+        fgets(msg,79,reader);
+        for(int i=79;i>=0;i--){
+            if(msg[i] == '\n'){
+                msg[i] = 0;
+                break;
+            }
+        }
+        //inja msg ha amadean , bayad age i az n bozorgtar mosavi bod chap konim
+        if(strstr(msg,query)!=NULL){
+            printf("%s\n",msg);
+
+            msg_array = qTjson_appendToArray(msg_array,msg);
+        }
+    }
+
+    char *output_str = qTjson_twinMessageWithArray("type","List","content",msg_array);
+    response(output_str);//ino  midim be client
 }
 
 void send_msg(char buffer[]){

@@ -61,6 +61,9 @@ void initialize(){
 }//void initialize
 
 void account_menu(){
+	system("cls");
+	system("color B0");
+
 	puts("A:type L to login , R to register .");
 	char entrance;
 	scanf("%c",&entrance);
@@ -81,8 +84,11 @@ void account_menu(){
 }//VOID ACCOUNT MENU
 
 void main_menu(){
+	system("cls");
+	system("color 30");
+
 	while(true){
-	puts("M: type C to create a channel , J to join one , L to log out or Q for a quote.");
+	puts("M: type C to create a channel , J to join one , X to search for a user , L to log out or Q for a quote.");
 
 	char entrance;
 	scanf("%c",&entrance);
@@ -121,7 +127,7 @@ void main_menu(){
 			chat_menu();
 		}
 
-		
+
 
 	}
 
@@ -161,6 +167,33 @@ void main_menu(){
 		}
 
 	}
+	else if(entrance == 'X'){
+		char buffer[8000];
+		char query[32];
+		char medium;
+		memset(buffer, 0, sizeof(buffer));
+		puts("M: enter your search query... (max 30 chars, no space)");
+		scanf("%c",&medium);
+		scanf("%[^\n]s",query);
+
+
+		strcat(buffer,"searchusr ");
+		strcat(buffer,query);
+		strcat(buffer," ");
+		strcat(buffer,auth_token);
+		strcat(buffer,"\n");
+
+		initialize();
+		send(client_socket,buffer , strlen(buffer), 0);
+
+		memset(buffer, 0, sizeof(buffer));
+		recv(client_socket, buffer, sizeof(buffer), 0);
+
+		closesocket(client_socket);
+		puts("M:online usernames that include your query:");
+		qTjson_printMemList(buffer);
+		puts("");
+	}
 
 	else if(entrance == 'L'){
 		char buffer[MAX];
@@ -183,7 +216,7 @@ void main_menu(){
 		if(type==1){
 			puts("M: logged out successfully!");
 			account_menu();
-		} 
+		}
 	}
 
 	else if(entrance == 'Q'){
@@ -225,10 +258,11 @@ void main_menu(){
 }//VOID MAIN MENU
 
 void chat_menu(){
-
+	system("cls");
+	system("color 90");
 	while(true){
 	printf("C: you are in %s.\n",current_channel_name);
-	puts("C: type S to send a message , R to refresh , C to view members list and L to leave.");
+	puts("C: type S to send a message , R to refresh ,X to search messages , C to view members list and L to leave.");
 
 	char entrance;
 	scanf("%c",&entrance);
@@ -245,7 +279,7 @@ void chat_menu(){
 
 		puts("C: enter your message... (max 40 chars)");
 		scanf("%c",&medium);
-		scanf("%[^\n]",message);
+		scanf("%[^\n]s",message);
 
 		strcat(buffer,"send ");
 		strcat(buffer,message);
@@ -295,6 +329,33 @@ void chat_menu(){
 		if(type==1) printf("C: you left %s\n",current_channel_name);
 
 		main_menu();
+	}
+	else if(entrance == 'X'){
+		//search messages
+		char buffer[8000];
+		char query[42];
+		char medium;
+		memset(buffer, 0, sizeof(buffer));
+		puts("C: enter your search query... (max 40 chars, no space)");
+		scanf("%c",&medium);
+		scanf("%[^\n]s",query);
+
+
+		strcat(buffer,"searchmsg ");
+		strcat(buffer,query);
+		strcat(buffer," ");
+		strcat(buffer,auth_token);
+		strcat(buffer,"\n");
+
+		initialize();
+		send(client_socket,buffer , strlen(buffer), 0);
+
+		memset(buffer, 0, sizeof(buffer));
+		recv(client_socket, buffer, sizeof(buffer), 0);
+
+		closesocket(client_socket);
+		puts("C: messages that include your query:");
+		qTjson_printRefresh(buffer);
 	}
 
 	}
@@ -373,7 +434,7 @@ void register_user() {
 
 	int type;
 	char * result = qTjson_parseTwin(buffer,&type);
-	
+
 
 	if(type==0){
 		printf("Error:%s\n",result);
@@ -418,7 +479,7 @@ void login(){
 
 	if(type==0){
 		printf("L:Error:%s\n",result);
-		
+
 		//printf("server:%s\n",buffer);
 
 		account_menu();
